@@ -1,6 +1,6 @@
 Namespaces.js
 =============
-Namespaces.js helps you to organize complex Javascript classes. Featuring:
+Namespaces.js helps you to organize complex Javascript namespaces. Featuring:
 
  * Event handlers
  * Asynchronous namespace loading
