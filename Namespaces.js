@@ -1,7 +1,7 @@
 /*
-    Namespace.js
+    Namespaces.js
     @author Victor Gama (@victrgama)
-    @version 2.9.1a
+    @version 2.9.1b
 */
 var Namespaces = (function() {
     var _registredNamespaces = {};
