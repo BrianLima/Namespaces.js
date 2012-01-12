@@ -28,14 +28,14 @@ Usage
     foo.bar.log("hello, world"); // Prints "hello, world" on console, if available.
 
 ### Importing an existent namespace
-Importing namespaces is pretty easy, you just need to specift which one you want to import.
+Importing namespaces is pretty easy, you just need to specify which one you want to import.
 
     Namespaces.import("foo.bar.test"); // Imports foo/bar/test.js into document.
 
 After this point, you can access any `foo.bar.test`'s property or method.
 
 #### Using callbacks
-You can also set a callbacks (for success and error), which will be executed after the namespace gets imported.
+You can also set callbacks (for success and error), which will be executed after the namespace gets imported.
 
     Namespaces.import("foo.bar.inexistent", function() {
         foo.bar.log("imported successfully");
