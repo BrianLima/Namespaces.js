@@ -265,5 +265,5 @@ var Namespaces = (function() {
 
 // Sets the baseUrl where Namespaces.js will look for .js files
 Namespaces.baseUrl = "/";
-// 
+// If set to true, it will force requested pages not to be cached by the browser.
 Namespaces.stopCaching = true;
