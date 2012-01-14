@@ -5,9 +5,18 @@ Namespaces.js helps you to organize complex Javascript namespaces. Featuring:
  * Event handlers
  * Asynchronous namespace loading
  * Callbacks
+ * Cache control
 
 Usage
 -----
+
+### Configuring
+There's just two options to customize Namespaces.js.
+
+ * `Namespaces.baseUrl` (**Required**): Sets the base url which `Namespaces.js` will look for plugins. <br/>
+Example: Setting `Namespaces.baseUrl` to `/MyScripts` and importing namespace `Foo.bar` will result in a `GET` operation to `/MyScripts/Foo/bar.js`
+ * `Namespaces.stopCaching` (Optional. Default: `false`): If set to `true`, it will force requested pages not to be cached by the browser.
+
 
 ### Creating a namespace:
 #### 1st way (less cool)

@@ -1,14 +1,15 @@
 /*
     Namespaces.js
     @author Victor Gama (@victrgama)
-    @version 2.9.1b
+    http://github.com/VictorGama/Namespaces.js
+    @version 2.9.2b
 */
 var Namespaces = (function() {
     var _registredNamespaces = {};
     var _listeners = {};
     /**
-     * Retorna o objeto dentro de uma Array se o objeto não for uma Array
-     *  @param      {Object} obj    O objeto a ser processado
+     * Returns the object inside an Array if object isn't already an Array.
+     *  @param      {Object} obj    Object to be processed
      *  @returns    {Array}
      **/
     var _toArray = function(obj) {
@@ -18,8 +19,23 @@ var Namespaces = (function() {
         return Array(obj);
     };
     /**
-     * Tenta criar um XMLHttpRequest
-     * @returns {XMLHttpRequest} O XMLHttpRequest
+     * Returns a random-generated string
+     * @param   Integer length String length
+     * @returns String  The random-generated string
+     */
+    var _rndStr = function(length) {
+        length = length || 6;
+        var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        var result = "";
+        for (var i = 0; i < length; i++) {
+            var index = Math.floor(Math.random() * chars.length);
+            result += chars.substring(index, index + 1);
+        }
+        return result;
+    }
+    /**
+     * Try to create a XMLHttpRequest
+     * @returns {XMLHttpRequest} The XMLHttpRequest
      */
     var _createXMLHttpRequest = function() {
         var xhr;
@@ -37,8 +53,8 @@ var Namespaces = (function() {
         return xhr;
     };
     /**
-     * Verifica se uma solicitação {XMLHttpRequest} teve êxito a partir do seu status code
-     * @param {Integer} status Código de status HTTP
+     * Checks if a request (XMLHttpRequest) has been successfull from it's status code
+     * @param {Integer} status Http Status Code
      * @returns {Boolean}
      */
     var _isRequestOkay = function(status) {
@@ -48,28 +64,28 @@ var Namespaces = (function() {
         (!status && (window.location.protocol == "file" || window.location.protocol == "chrome:"));
     };
     /**
-     * Cria um elemento script com o valor especificado como conteúdo
-     * @param {String} data O conteúdo do Script
+     * Creates a script element with the specified value as the content
+     * @param {String} data Script's content
      */
     var _createScript = function(data) {
         var script = document.createElement("script");
         script.type = "text/javascript";
         script.text = data;
         
-        if(typeof(window.execScript) === "object") { // IE como sempre, dando trabalho.
+        if(typeof(window.execScript) === "object") {
             window.execScript(data);
         } else {
             try {
                 document.body.appendChild(script);
-            } catch(e) { // Teremos que utilizar o Eval
+            } catch(e) { // The Evil Eval
                 window["eval"](data);
             }
         }
     };
     /**
-     * Dispara um evento
-     * @param   {String} event O Identificador do evento
-     * @param   {Object} properties As propriedades do evento
+     * Throws an event
+     * @param   {String} event Event's ID
+     * @param   {Object} properties Event's properties
      */
     var _triggerEvent = function(event, properties) {
         if(!_listeners[event]) { return; }
@@ -79,17 +95,17 @@ var Namespaces = (function() {
         }
     };
     /**
-     * Cria um objeto seguido do identificador do namespace especificado.
+     * Creates an object followed by the specified namespace's identifier
      * @public
-     * @param   {String}    identifier  O identificador do namespace
-     * @param   {Object}    $classes    Objeto na qual as propriedades serão implementadas no namespace
+     * @param   {String}    identifier  Namespace's identifier
+     * @param   {Object}    $classes    Object which properties and method will be implemented on the namespace
      * @return  {Object}
      */
     var _namespace = function(namespace) {
         var $classes = arguments[1] || false;
         var target = window;
         if(namespace != '') {
-            var parts = event.split('.');
+            var parts = namespace.split('.');
             for(var p = 0; p < parts.length; p++) {
                 if(!target[parts[p]]) { target[parts[p]] = {}; }
                 else { target = target[parts[p]]; }
@@ -103,12 +119,12 @@ var Namespaces = (function() {
         }
         
         _triggerEvent("created", { namespace: namespace });
-        return ns;
+        return target;
     };
     /**
-     * Verifica se um identificador já está registrado
+     * Checks if an identifier is already registred
      * @public
-     * @param   {String}    identifier  O Identificador a ser verificado
+     * @param   {String}    identifier  Identifier to be checked
      * @returns {Boolean}
      */
     _namespace.exists = function(namespace) {
@@ -122,20 +138,22 @@ var Namespaces = (function() {
         return true;
     };
     /**
-     * Mapeia um identificador para uma URL.
+     * Maps an identifier to an Url
      * @public
-     * @param {String}  identifier  Identificador a ser mapeado.
-     * @returns {String} O caminho URL para o script
+     * @param {String}  identifier  Identifier to be mapped
+     * @returns {String} URL path to the script
      */
     _namespace.mapNamespaceToUrl = function(namespace) {
         var regexp = new RegExp('\\.', 'g');
-        return Namespace.baseUri + namespace.replace(regexp, '/') + '.js';
+        var burl = Namespaces.baseUrl;
+        burl = burl + (burl[burl.length - 1] == '/' || burl[burl.length - 1] == '\\' ? '' : "/");
+        return burl + namespace.replace(regexp, '/') + '.js';
     };
     /**
-     * Carrega um script remoto após mapear o caminho para o mesmo.
-     * @param {String}      namespace   O Namespace a ser carregado
-     * @param {Function}    callback    O callback para quando o script for carregado
-     * @param {Function}    error       O callback para quando houver um erro durante o carregamento
+     * Loads a script after mapping it's path
+     * @param {String}      namespace   Namespace to be loaded
+     * @param {Function}    callback    Success callback
+     * @param {Function}    error       Optional error callback
      * @returns {Boolean}
      */
     var _loadScript = function(namespace) {
@@ -143,6 +161,9 @@ var Namespaces = (function() {
         var error = arguments[2] || false;
         var isAsync = (typeof(callback) === "function");
         var url = _namespace.mapNamespaceToUrl(namespace);
+        if(Namespaces.stopCaching) {
+            url += "? =" + _rndStr();
+        }
         var event = {
             namespace: namespace,
             url: url,
@@ -162,7 +183,7 @@ var Namespaces = (function() {
             _triggerEvent("importFailed", event);
             if(error) { error(); return false; } else { return false; }
         }
-        xhr.open("GET", uri, isAsync);
+        xhr.open("GET", url, isAsync);
         if(isAsync) {
             xhr.onreadystatechange = function() {
                 if(xhr.readyState == 4) {
@@ -182,11 +203,10 @@ var Namespaces = (function() {
         }
     };
     /**
-     * Importa um namespace carregando seu arquivo correspondente para o
-     * documento.
+     * Imports a namespace loading it's corresponding file to the document
      * @public
-     * @param {String} namespace O Namespace a ser importado
-     * @param {Function} callback A função a ser executada quando o namespace tiver sido importado.
+     * @param {String} namespace Namespace to be imported
+     * @param {Function} callback Function to be executed after namespace gets loaded
      */
     _namespace.import = function(namespace) {
         var callback = arguments[1] || false;
@@ -213,20 +233,21 @@ var Namespaces = (function() {
         return false;
     };
     /**
-     * Registra um callback para quando um determinado evento for disparado.
+     * Register a callback for a determined event
+     * 
      * @public
-     * @param   {String}    event   O evento a ser monitorado
-     * @param   {Function}  callback    O callback para quando o evento for disparado
+     * @param   {String}    event   Event to be watched
+     * @param   {Function}  callback    Callback
      */
     _namespace.addEventListener = function(event, callback) {
         if(!_listeners[event]) { _listeners[event] = []; }
         _listeners[event].push(callback);
     };
     /**
-     * Remove o callback para um determinado evento.
+     * Unregister an event's callback
      * @public
-     * @param   {String}    event   O evento na qual o callback está associado
-     * @param   {Function}  callback    O callback a ser removido
+     * @param   {String}    event   Associated event's callback
+     * @param   {Function}  callback    Callback to be removed
      */
     _namespace.removeEventListener = function(event, callback) {
         if(!_listeners[event]) { return; }
@@ -238,5 +259,11 @@ var Namespaces = (function() {
         }
     };
     return _namespace;
-});
+})();
 
+// Namespaces default configuration
+
+// Sets the baseUrl where Namespaces.js will look for .js files
+Namespaces.baseUrl = "/";
+// 
+Namespaces.stopCaching = true;
